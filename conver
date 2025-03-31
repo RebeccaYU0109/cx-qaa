@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>맞춤법 연습 게임</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #fce4ec;
+            padding: 20px;
+        }
+        #container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+        #sentence {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        #userInput {
+            width: 80%;
+            padding: 10px;
+            font-size: 18px;
+        }
+        #feedback {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        #result, #summary {
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+            background-color: #ff80ab;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ff4081;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h2>맞춤법 연습 게임</h2>
+        <p id="sentence"></p>
+        <input type="text" id="userInput" placeholder="올바르게 입력하세요" autofocus>
+        <p id="feedback"></p>
+        <p id="result"></p>
+        <button id="nextButton">다음 문장</button>
+        <button id="submitButton" style="display: none;">제출</button>
+        <div id="summary" style="display: none;"></div>
+    </div>
+    
+    <script>
+        const sentences = [
+            { correct: "잠자는 숲속의 미녀가 잠들지 않았다면?", incorrect: "잠 자는 숲 속의 미녀가 잠들지 않았다면?" },
+            { correct: "한때, 한 왕국의 숲속에 아름다운 공주가 살고 있었습니다.", incorrect: "한때, 한 왕국의 숲 속에 아름다운 공주가 살고 있었습니다." },
+            { correct: "공주는 잠자는 저주를 받은 것이 아니라, 깊은 숲에서 삶을 즐기고 있었습니다.", incorrect: "공주는 잠 자는 저주를 받은것이 아니라, 깊은숲에서 삶을 즐기고 있었습니다." },
+            { correct: "그녀는 용감하고 호기심이 많았으며, 잠든 채로 놓인 성에 들어가서 무엇이 일어나고 있는지 알아보고 싶어 했습니다.", incorrect: "그녀는 용감하고 호기심이 많았으며, 잠든채로 놓인 성에 들어 가서 무엇이 일어나고 있는지 알아 보고 싶어했습니다." },
+            { correct: "한 날, 공주는 숲속을 거닐다가 고대의 성으로 향했습니다.", incorrect: "한날, 공주는 숲 속을 거닐다가 고대의 성으로 향했습니다." },
+            { correct: "그곳에는 아름다운 화살과 웅장한 탑이 있었습니다.", incorrect: "그 곳에는 아름다운 화살과 웅장한 탑이 있었습니다." },
+            { correct: "공주는 호기심에 이끌려 성으로 들어갔고, 그곳에서 마법에 걸린 사람들의 이야기를 듣게 되었습니다.", incorrect: "공주는 호기심에 이끌려 성으로 들어 갔고, 그 곳에서 마법에 걸린 사람들의 이야기를 듣게되었습니다." },
+            { correct: "그 이야기를 듣고 나서, 공주는 마법을 풀기 위해 힘을 모으기로 결심했습니다.", incorrect: "그 이야기를 듣고나서, 공주는 마법을 풀기 위해 힘을 모으기로 결심 했습니다." },
+            { correct: "그녀는 성 밖으로 나가서 마법의 힘을 찾기 시작했고, 여러 모험과 시험을 겪으며 성 밖으로 나아갔습니다.", incorrect: "그녀는 성밖으로 나가서 마법의 힘을 찾기 시작 했고, 여러 모험과 시험을 겪으며 성밖으로 나아갔습니다." },
+            { correct: "결국 공주는 마법을 깨고 성안에 갇힌 모든 이들을 자유롭게 할 수 있었습니다.", incorrect: "결국 공주는 마법을 깨고 성 안에 갇힌 모든 이들을 자유롭게 할 수 있었습니다." }
+        ];
+
+        let currentSentenceIndex = 0;
+        let startTime;
+        let totalErrors = 0;
+        let results = [];
+
+        function startGame() {
+            showSentence();
+            startTime = new Date().getTime();
+        }
+
+        function showSentence() {
+            document.getElementById("sentence").innerText = sentences[currentSentenceIndex].incorrect;
+            document.getElementById("userInput").value = "";
+            document.getElementById("feedback").innerText = "";
+        }
+
+        function checkInput() {
+            const userInput = document.getElementById("userInput").value;
+            const correctSentence = sentences[currentSentenceIndex].correct;
+            
+            let feedback = "";
+            let errors = 0;
+            for (let i = 0; i < userInput.length; i++) {
+                if (userInput[i] !== correctSentence[i]) {
+                    feedback += `<span style='color: red;'>${correctSentence[i]}</span>`;
+                    errors++;
+                } else {
+                    feedback += `<span style='color: green;'>${correctSentence[i]}</span>`;
+                }
+            }
+            document.getElementById("feedback").innerHTML = feedback;
+            totalErrors += errors;
+        }
+
+        function nextSentence() {
+            results.push({
+                correct: sentences[currentSentenceIndex].correct,
+                user: document.getElementById("userInput").value
+            });
+            
+            if (currentSentenceIndex < sentences.length - 1) {
+                currentSentenceIndex++;
+                showSentence();
+            } else {
+                document.getElementById("nextButton").style.display = "none";
+                document.getElementById("submitButton").style.display = "inline";
+            }
+        }
+
+        function showSummary() {
+            const timeTaken = ((new Date().getTime() - startTime) / 1000).toFixed(2);
+            let summaryHTML = `<h3>결과 요약</h3>`;
+            let correctCount = 0;
+            
+            results.forEach((result, index) => {
+                const isCorrect = result.correct === result.user;
+                if (isCorrect) correctCount++;
+                summaryHTML += `<p>${index + 1}. ${isCorrect ? "✅" : "❌"} 입력: ${result.user || "(미입력)"}<br> 정답: ${result.correct}</p>`;
+            });
+            
+            let accuracy = ((correctCount / sentences.length) * 100).toFixed(2);
+            summaryHTML += `<p><strong>총 소요 시간:</strong> ${timeTaken}초</p>`;
+            summaryHTML += `<p><strong>정확도:</strong> ${accuracy}%</p>`;
+            document.getElementById("summary").innerHTML = summaryHTML;
+            document.getElementById("summary").style.display = "block";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            startGame();
+            document.getElementById("userInput").addEventListener("input", checkInput);
+            document.getElementById("nextButton").addEventListener("click", nextSentence);
+            document.getElementById("submitButton").addEventListener("click", showSummary);
+        });
+    </script>
+</body>
+</html>
